@@ -1,13 +1,14 @@
-version: "V1.0"
+version: '3'
+
 services:
   config:
     image: jayaprakashlt/config
     container_name: config
-    ports: 
-      - 8888:8888
+    ports:
+      - "8888:8888"
     networks:
       - ladera-nw
-    depends_on: 
+    depends_on:
       - rabbit-mq
     volumes:
       - /data/config
@@ -17,9 +18,9 @@ services:
   rabbit-mq:
     image: rabbitmq:3-management
     container_name: rabbitmq
-    ports: 
-      - 15672:15672
-      - 5672:5672
+    ports:
+      - "15672:15672"
+      - "5672:5672"
     networks:
       - ladera-nw
     volumes:
@@ -28,8 +29,8 @@ services:
   core:
     image: jayaprakashlt/core
     container_name: core
-    ports: 
-      - 8082:8082
+    ports:
+      - "8082:8082"
     networks:
       - ladera-nw
     depends_on:
@@ -42,13 +43,12 @@ services:
       SPRING_CLOUD_CONFIG_URI: http://config:8888
       SPRING_CLOUD_CONFIG_PROFILE: dev
 
-
   datamanagement:
     image: jayaprakashlt/datamanagement
     container_name: datamanagement
-    ports: 
-      - 15672:15672
-      - 5672:5672
+    ports:
+      - "15673:15672"  # Example change to avoid port conflict
+      - "5673:5672"    # Example change to avoid port conflict
     networks:
       - ladera-nw
     depends_on:
@@ -61,5 +61,6 @@ services:
       SPRING_CLOUD_CONFIG_URI: http://config:8888
       SPRING_CLOUD_CONFIG_PROFILE: qa
 
-network:
-  - ladera-nw
+networks:
+  ladera-nw:
+    driver: bridge

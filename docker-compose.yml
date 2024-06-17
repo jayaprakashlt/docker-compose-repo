@@ -1,0 +1,65 @@
+version: "V1.0"
+services:
+  config:
+    image: jayaprakashlt/config
+    container_name: config
+    ports: 
+      - 8888:8888
+    networks:
+      - ladera-nw
+    depends_on: 
+      - rabbit-mq
+    volumes:
+      - /data/config
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit-mq
+
+  rabbit-mq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports: 
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - ladera-nw
+    volumes:
+      - /data/rabbitmq
+
+  core:
+    image: jayaprakashlt/core
+    container_name: core
+    ports: 
+      - 8082:8082
+    networks:
+      - ladera-nw
+    depends_on:
+      - config
+    volumes:
+      - /data/core
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_CONFIG_IMPORT: configserver:http://config:8888
+      SPRING_CLOUD_CONFIG_URI: http://config:8888
+      SPRING_CLOUD_CONFIG_PROFILE: dev
+
+
+  datamanagement:
+    image: jayaprakashlt/datamanagement
+    container_name: datamanagement
+    ports: 
+      - 15672:15672
+      - 5672:5672
+    networks:
+      - ladera-nw
+    depends_on:
+      - config
+    volumes:
+      - /data/datamanagement
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit-mq
+      SPRING_CONFIG_IMPORT: configserver:http://config:8888
+      SPRING_CLOUD_CONFIG_URI: http://config:8888
+      SPRING_CLOUD_CONFIG_PROFILE: qa
+
+network:
+  - ladera-nw

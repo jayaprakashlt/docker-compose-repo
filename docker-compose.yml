@@ -14,6 +14,12 @@ services:
       - /data/config
     environment:
       SPRING_RABBITMQ_HOST: rabbit-mq
+    healthcheck:
+      test: "curl --fail --silent config:8888/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   rabbit-mq:
     image: rabbitmq:3-management
@@ -25,6 +31,12 @@ services:
       - ladera-nw
     volumes:
       - /data/rabbitmq
+    healthcheck:
+      test: "curl --fail --silent rabbit-mq:5672/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   core:
     image: jayaprakashlt/core
@@ -43,23 +55,8 @@ services:
       SPRING_CLOUD_CONFIG_URI: http://config:8888
       SPRING_CLOUD_CONFIG_PROFILE: dev
 
-  datamanagement:
-    image: jayaprakashlt/datamanagement
-    container_name: datamanagement
-    ports:
-      - "15673:15672"  # Example change to avoid port conflict
-      - "5673:5672"    # Example change to avoid port conflict
-    networks:
-      - ladera-nw
-    depends_on:
-      - config
-    volumes:
-      - /data/datamanagement
-    environment:
-      SPRING_RABBITMQ_HOST: rabbit-mq
-      SPRING_CONFIG_IMPORT: configserver:http://config:8888
-      SPRING_CLOUD_CONFIG_URI: http://config:8888
-      SPRING_CLOUD_CONFIG_PROFILE: qa
+
+
 
 networks:
   ladera-nw:

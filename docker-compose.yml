@@ -14,13 +14,13 @@ services:
       - /data/config
     environment:
       SPRING_RABBITMQ_HOST: rabbit-mq
-    deploy:
-      healthcheck:
-        test: ["CMD", "curl", "--fail", "--silent", "config:8888/actuator/health/readiness"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 10s
+    
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "config:8888/actuator/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   rabbit-mq:
     image: rabbitmq:3-management

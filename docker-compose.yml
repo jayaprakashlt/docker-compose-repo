@@ -9,7 +9,8 @@ services:
     networks:
       - ladera-nw
     depends_on:
-      - rabbit-mq
+      rabbit-mq:
+        condition: service_healthy
     volumes:
       - /data/config
     environment:
@@ -32,7 +33,7 @@ services:
     volumes:
       - /data/rabbitmq
     healthcheck:
-      test: "curl --fail --silent http://rabbit-mq:5672/actuator/health/readiness | grep UP || exit 1"
+      test: "rabbitmq-diagnostics check_port_connectivity"
       interval: 10s
       timeout: 5s
       retries: 10
@@ -46,7 +47,8 @@ services:
     networks:
       - ladera-nw
     depends_on:
-      - config
+      config:
+        condition: service_healthy
     volumes:
       - /data/core
     environment:

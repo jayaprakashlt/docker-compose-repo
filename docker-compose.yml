@@ -32,13 +32,6 @@ services:
       - ladera-nw
     volumes:
       - /data/rabbitmq
-    deploy:
-      healthcheck:
-        test: ["CMD", "curl", "--fail", "--silent", "rabbit-mq:5672/actuator/health/readiness"]
-        interval: 10s
-        timeout: 5s
-        retries: 10
-        start_period: 10s
 
   core:
     image: jayaprakashlt/core

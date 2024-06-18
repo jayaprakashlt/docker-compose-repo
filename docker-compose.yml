@@ -9,8 +9,7 @@ services:
     networks:
       - ladera-nw
     depends_on:
-      rabbit-mq:
-        condition: service_healthy
+      - rabbit-mq
     volumes:
       - /data/config
     environment:
@@ -47,8 +46,7 @@ services:
     networks:
       - ladera-nw
     depends_on:
-      config:
-        condition: service_healthy
+      - config
     volumes:
       - /data/core
     environment:

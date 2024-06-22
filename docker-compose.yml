@@ -1,29 +1,10 @@
 version: '3'
 
 services:
-  config:
-    image: jayaprakashlt/config
-    container_name: config
-    ports:
-      - "8888:8888"
-    networks:
-      - ladera-nw
-    depends_on:
-      - rabbit-mq
-    volumes:
-      - /data/config
-    environment:
-      SPRING_RABBITMQ_HOST: rabbit-mq
-    healthcheck:
-      test: "curl --fail --silent http://config:8888/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      
 
   rabbit-mq:
     image: rabbitmq:3-management
-    container_name: rabbitmq
+    container_name: rabbit-mq
     ports:
       - "15672:15672"
       - "5672:5672"
@@ -36,7 +17,28 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      
+      start_period: 5s
+
+  config:
+    image: jayaprakashlt/config
+    container_name: config
+    ports:
+      - "8888:8888"
+    networks:
+      - ladera-nw
+    depends_on:
+      rabbit-mq:
+        condition: service_healthy
+    volumes:
+      - /data/config
+    environment:
+      SPRING_RABBITMQ_HOST: rabbit-mq
+    healthcheck:
+      test: "curl --fail --silent http://config:8888/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s      
 
   core:
     image: jayaprakashlt/core
@@ -46,14 +48,16 @@ services:
     networks:
       - ladera-nw
     depends_on:
-      - config
+      config:
+        condition: service_healthy
+      
     volumes:
       - /data/core
     environment:
       SPRING_RABBITMQ_HOST: rabbit-mq
       SPRING_CONFIG_IMPORT: configserver:http://config:8888
       SPRING_CLOUD_CONFIG_URI: http://config:8888
-      SPRING_CLOUD_CONFIG_PROFILE: dev
+      SPRING_CLOUD_CONFIG_PROFILE: qa
 
 networks:
   ladera-nw:
